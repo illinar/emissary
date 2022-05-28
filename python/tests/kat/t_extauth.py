@@ -110,7 +110,7 @@ auth_context_extensions:
         assert "baz" in self.results[0].backend.request.headers
         assert self.results[0].status == 401
         assert self.results[0].headers["Server"] == ["envoy"]
-        assert self.results[0].headers['X-Grpc-Service-Protocol-Version'] == ['v2']
+        assert self.results[0].headers['X-Grpc-Service-Protocol-Version'] == ['v3']
 
         # [1] Verifies that Location header is returned from Envoy.
         assert self.results[1].backend.name == self.auth.path.k8s
@@ -118,7 +118,7 @@ auth_context_extensions:
         assert self.results[1].backend.request.headers["requested-location"] == ["foo"]
         assert self.results[1].status == 302
         assert self.results[1].headers["Location"] == ["foo"]
-        assert self.results[1].headers['X-Grpc-Service-Protocol-Version'] == ['v2']
+        assert self.results[1].headers['X-Grpc-Service-Protocol-Version'] == ['v3']
 
         # [2] Verifies Envoy returns whitelisted headers input by the user.
         assert self.results[2].backend.name == self.auth.path.k8s
@@ -128,7 +128,7 @@ auth_context_extensions:
         assert self.results[2].status == 401
         assert self.results[2].headers["Server"] == ["envoy"]
         assert self.results[2].headers["X-Foo"] == ["foo"]
-        assert self.results[2].headers['X-Grpc-Service-Protocol-Version'] == ['v2']
+        assert self.results[2].headers['X-Grpc-Service-Protocol-Version'] == ['v3']
 
         # [3] Verifies default whitelisted Authorization request header.
         assert self.results[3].backend.request.headers["requested-status"] == ["200"]
@@ -139,7 +139,7 @@ auth_context_extensions:
         assert self.results[3].status == 200
         assert self.results[3].headers["Server"] == ["envoy"]
         assert self.results[3].headers["Authorization"] == ["foo-11111"]
-        assert self.results[3].backend.request.headers['x-grpc-service-protocol-version'] == ['v2']
+        assert self.results[3].backend.request.headers['x-grpc-service-protocol-version'] == ['v3']
 
         # [4] Verifies that auth_context_extension is passed along by Envoy.
         assert self.results[4].status == 200
