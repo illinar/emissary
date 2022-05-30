@@ -325,18 +325,17 @@ class IR:
         # After TLSContexts, grab Listeners...
         ListenerFactory.load_all(self, aconf)
         
-        # mark all UDP listeners as http3_enabled, we then need to check to determine if it has a TCP companion Listener
-        # when a TCP listener that binds to the same address and port exists then it will be marked as http3_enabled as well
-        # By marking the TCP listener as http3_enabled it will have the `alt-svc` injected to notify clients such as browsers
-        # that http3 is supported.
+        # Now that we know all of the listeners, we can check to see if there are any companion listeners (TCP & UDP sharing same port).
+        # When a TCP listener that binds to the same address and port exists then it will be marked as http3_enabled
+        # By marking the TCP listener as http3_enabled the `alt-svc` header will be injected to notify clients (browsers, curl, libraries)
+        # that http3 they should upgrade thier TCP connections to UDP (HTTP/3) connections.
 
-        # Note: at first glance it would seem this logic should sit inside the Listener class but it must check after all the listeners 
-        # are loaded to see if a companion TCP exists for a UDP Listner which isn't know at Listener instantiation time.
+        # Note: at first glance it would seem this logic should sit inside the Listener class but we wait until the listeners 
+        # are loaded so that we can check for the existance of a companion TCP Listener. If a UDP listener was the first to be parsed then
+        # we wouldn't know at that time. Thus we need to wait until after all of them have been loaded.
         udp_listeners  = (l for l in self.listeners.values() if l.socket_protocol == "UDP")
         for listener in udp_listeners:
-            listener.http3_enabled = True
-
-             ## this matches the `listener.bind_to` for a tcp listener
+            ## this matches the `listener.bind_to` for the tcp listener
             tcp_listener_key = f"tcp-{listener.bind_address}-{listener.port}"
             companion_tcp_listener = self.listeners.get(tcp_listener_key, None)
 

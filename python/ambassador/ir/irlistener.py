@@ -149,6 +149,14 @@ class IRListener (IRResource):
             self.post_error(f"TCP or UDP should be the last protocol in the protocolStack. Unable to determine socket protocol for listener {self.name}")
             return False
         
+        # To allow for support raw UDP in the future we must check whether the protocolStack includes HTTP.
+        # Having both HTTP and UDP will indicate that the QUIC protocol should be used rather than raw UDP traffic
+        if (self.socket_protocol == "UDP") & ("HTTP" in self.protocolStack):
+            self.http3_enabled = True
+        else:
+            self.post_error(f"UDP is only supported with HTTP. Invalid protocolStack for listener {self.name}")
+            return False
+
         if not securityModel:
             self.post_error("securityModel is required")
             return False
@@ -167,7 +175,7 @@ class IRListener (IRResource):
             elif tlsActive:
                 self.statsPrefix = f"ingress_tls_{self.port}"
             else:
-                self.statsPrefix = f"ingress_tcp_{self.port}"
+                self.statsPrefix = f"ingress_{self.socket_protocol.lower()}_{self.port}"
 
         # Deal with hostBinding. First up, namespaces.
         hostbinding = self.get("hostBinding", None)

@@ -406,9 +406,7 @@ class V3Listener(dict):
             'normalize_path': True
         }
 
-        # Instructs the HTTP Connection Mananger to support http/3 and which codec it should use.
-        # This is required for the UDP listener and its companion TCP listener that
-        # enables HTTP/3 upgrade via the `alt-svc` header
+        # Instructs the HTTP Connection Mananger to support http/3. This is required for both TCP and UDP Listeners
         if self.http3_enabled:
             base_http_config['http3_protocol_options'] = {}
             if self.isProtocolUDP():
