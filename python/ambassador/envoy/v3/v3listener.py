@@ -411,9 +411,7 @@ class V3Listener(dict):
         # enables HTTP/3 upgrade via the `alt-svc` header
         if self.http3_enabled:
             base_http_config['http3_protocol_options'] = {}
-            if self.isProtocolTCP():
-                base_http_config['codec_type'] = "HTTP2"
-            else:
+            if self.isProtocolUDP():
                 base_http_config['codec_type'] = "HTTP3"
 
         # Assemble base HTTP filters
